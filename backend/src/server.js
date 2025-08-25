@@ -52,7 +52,28 @@ app.use('/api/enhance', enhanceRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  console.log('🏥 Health check requested');
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    env: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Food Photo Enhancer API',
+    status: 'OK',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      enhance: '/api/enhance/single',
+      batch: '/api/enhance/batch'
+    }
+  });
 });
 
 // Error handling middleware
