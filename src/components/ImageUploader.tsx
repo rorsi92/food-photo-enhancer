@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { ImageFile } from '../types';
+import type { ImageFile } from '../types';
 import { createImagePreview, validateImageFile, generateId } from '../utils/imageProcessing';
 
 interface ImageUploaderProps {

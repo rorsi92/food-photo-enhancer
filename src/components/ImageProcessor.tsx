@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ImageFile, ProcessingResult } from '../types';
+import type { ImageFile, ProcessingResult } from '../types';
 import axios from 'axios';
 
 interface ImageProcessorProps {
@@ -18,7 +18,6 @@ export const ImageProcessor: React.FC<ImageProcessorProps> = ({
   setIsProcessing,
 }) => {
   const [progress, setProgress] = useState(0);
-  const [currentImage, setCurrentImage] = useState(0);
 
   const processImages = async () => {
     setIsProcessing(true);
@@ -90,7 +89,7 @@ export const ImageProcessor: React.FC<ImageProcessorProps> = ({
       </h2>
 
       <div className="space-y-4">
-        {images.map((image, index) => (
+        {images.map((image, _index) => (
           <div
             key={image.id}
             className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
@@ -109,7 +108,7 @@ export const ImageProcessor: React.FC<ImageProcessorProps> = ({
               </p>
             </div>
             <div className="w-8 h-8">
-              {isProcessing && currentImage === index && (
+              {isProcessing && (
                 <svg
                   className="animate-spin h-8 w-8 text-blue-500"
                   xmlns="http://www.w3.org/2000/svg"

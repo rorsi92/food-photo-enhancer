@@ -1,4 +1,4 @@
-import { EnhancementOptions } from '../types';
+import type { EnhancementOptions } from '../types';
 
 export const createImagePreview = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {

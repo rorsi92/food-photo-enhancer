@@ -115,8 +115,9 @@ function App() {
           clearInterval(progressInterval);
           
           console.error('❌ Frontend error:', error);
-          console.error('❌ Error response:', error.response?.data);
-          console.error('❌ Error status:', error.response?.status);
+          const err = error as any;
+          console.error('❌ Error response:', err?.response?.data);
+          console.error('❌ Error status:', err?.response?.status);
           
           // Update with error
           setPhotoProgress(prev => 
@@ -126,7 +127,7 @@ function App() {
                     ...photo, 
                     status: 'error', 
                     progress: 0,
-                    error: error.response?.data?.error || 'Erro ao processar imagem'
+                    error: err?.response?.data?.error || 'Erro ao processar imagem'
                   }
                 : photo
             )

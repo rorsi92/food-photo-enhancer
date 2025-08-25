@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ProcessingResult } from '../types';
+import type { ProcessingResult } from '../types';
 
 interface ResultDisplayProps {
   results: ProcessingResult[];
