@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String         @id @default(cuid())
+  email             String         @unique
+  password          String
+  name              String?
+  avatarUrl         String?
+  emailVerified     Boolean        @default(false)
+  verificationToken String?
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  subscription      Subscription?
+  photos           Photo[]
+  usageHistory     UsageHistory[]
+  refreshTokens    RefreshToken[]
+}
+
+model Subscription {
+  id                String            @id @default(cuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan              String            @default("FREE")
+  status            String            @default("ACTIVE")
+  stripeCustomerId  String?           @unique
+  stripeSubscriptionId String?        @unique
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean          @default(false)
+  photosProcessed    Int              @default(0)
+  monthlyLimit       Int              @default(10)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+model Photo {
+  id               String          @id @default(cuid())
+  userId           String
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  originalUrl      String
+  enhancedUrl      String?
+  thumbnailUrl     String?
+  fileName         String
+  fileSize         Int
+  mimeType         String
+  width            Int?
+  height           Int?
+  enhancementLevel String          @default("MEDIUM")
+  enhancementSettings String?
+  processingTime   Int?
+  status           String          @default("PENDING")
+  error            String?
+  metadata         String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+}
+
+model UsageHistory {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action          String
+  photosProcessed Int      @default(1)
+  creditsUsed     Int      @default(1)
+  metadata        String?
+  createdAt       DateTime @default(now())
+  
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([token])
+}
