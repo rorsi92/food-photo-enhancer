@@ -5,7 +5,6 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "node src/server.js",
-    "build": "tsc && prisma generate",
     "start": "prisma migrate deploy && node src/server.js",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
