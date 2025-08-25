@@ -69,13 +69,13 @@ router.post('/single', upload.single('photo'), async (req, res) => {
     
     let result;
     try {
-      // Try simple enhancement first - more reliable
-      console.log('🔄 Trying SIMPLE enhancement first...');
-      result = await simpleEnhance.enhancePhoto(req.file.path, outputPath);
-    } catch (simpleError) {
-      console.log('❌ Simple enhancement failed, trying OpenAI...');
+      // Try DALL-E 3 enhancement first - new AI generation method
+      console.log('🎨 Trying DALL-E 3 generation...');
+      result = await openaiService.enhancePhoto(req.file.path, outputPath);
+    } catch (dalleError) {
+      console.log('❌ DALL-E 3 failed, trying simple enhancement...');
       try {
-        result = await openaiService.enhancePhoto(req.file.path, outputPath);
+        result = await simpleEnhance.enhancePhoto(req.file.path, outputPath);
       } catch (enhancementError) {
         console.error('❌ Both enhancement methods failed');
         throw new Error(`Image enhancement failed: ${enhancementError.message}`);

@@ -19,7 +19,7 @@ class OpenAIService {
 
   async enhancePhoto(imagePath, outputPath) {
     try {
-      console.log('📸 Starting photo enhancement...');
+      console.log('📸 Starting DALL-E 3 photo enhancement...');
       console.log('Input:', imagePath);
       console.log('Output:', outputPath);
 
@@ -40,7 +40,7 @@ class OpenAIService {
         return this.fallbackEnhancement(imagePath, outputPath);
       }
 
-      // Read the image and convert to base64
+      // Read the image and convert to base64 for analysis
       const imageBuffer = await fs.readFile(imagePath);
       const base64Image = imageBuffer.toString('base64');
       
@@ -51,37 +51,26 @@ class OpenAIService {
         throw new Error(`Unsupported image format: ${imageInfo.format}`);
       }
       
-      console.log('🤖 Calling OpenAI Vision API...');
+      console.log('🤖 Analyzing image with GPT-4o...');
       
-      // Call OpenAI Vision API with timeout
-      const apiCall = this.openai.chat.completions.create({
-        model: "gpt-4o",
+      // First, analyze the image to understand what food it is
+      const analysisCall = this.openai.chat.completions.create({
+        model: process.env.OPENAI_MODEL || "gpt-4o",
         messages: [
           {
             role: "user",
             content: [
               { 
                 type: "text", 
-                text: `Estou te enviando um prompt em json form, direcionado para melhoria de imagem de um prato de comida. Vou te enviar em anexo uma imagem de outro prato de comida, analise a estrutura do prompt original e adeque ela para este novo prato de comida, mudando somente a estrutura variável do prompt:
+                text: `Analise esta imagem de comida e retorne APENAS um objeto JSON com a descrição detalhada:
 
                 {
-                  "acao": "aprimorar_imagem",
-                  "produto": "[tipo de comida identificado na imagem]",
-                  "objetivo": "aumentar_atratividade_ifood",
-                  "aspectos_melhorar": [
-                    "nitidez",
-                    "cores", 
-                    "iluminacao",
-                    "textura_alimento"
-                  ],
-                  "estilo_desejado": "profissional_apetitoso",
-                  "brightness": 1.2,
-                  "contrast": 1.3,
-                  "saturation": 1.4,
-                  "observacoes": "Manter realismo do [produto], realçar ingredientes frescos. Foco em gerar desejo de consumo imediato."
+                  "produto": "[tipo específico de comida identificado]",
+                  "descricao_detalhada": "[descrição completa da comida, ingredientes visíveis, apresentação, cores, texturas]",
+                  "observacoes": "[características específicas desta comida que devem ser realçadas]"
                 }
 
-                Retorne APENAS o objeto JSON adaptado para o prato específico da imagem enviada.`
+                Seja muito específico e detalhado na descrição para gerar uma imagem melhorada.`
               },
               {
                 type: "image_url",
@@ -93,56 +82,76 @@ class OpenAIService {
             ]
           }
         ],
-        max_tokens: 300,
+        max_tokens: 500,
         response_format: { type: "json_object" }
       });
 
-      const response = await Promise.race([
-        apiCall,
+      const analysisResponse = await Promise.race([
+        analysisCall,
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('OpenAI API timeout')), 30000)
+          setTimeout(() => reject(new Error('OpenAI Analysis timeout')), 30000)
         )
       ]);
 
-      console.log('✅ OpenAI response received');
-      
       let analysis;
       try {
-        analysis = JSON.parse(response.choices[0].message.content);
+        analysis = JSON.parse(analysisResponse.choices[0].message.content);
+        console.log('📊 Food Analysis:', analysis);
       } catch (parseError) {
-        console.warn('⚠️ Failed to parse OpenAI response, using defaults');
+        console.warn('⚠️ Failed to parse analysis, using generic description');
         analysis = {
           produto: 'prato de comida',
-          brightness: 1.2,
-          contrast: 1.3,
-          saturation: 1.4,
-          observacoes: 'Parâmetros padrão aplicados devido a erro na análise'
+          descricao_detalhada: 'prato de comida apetitoso',
+          observacoes: 'realçar cores e apresentação'
         };
       }
-      
-      console.log('📊 Analysis:', analysis);
-      
-      // Apply enhancements using Sharp with proper validation
-      console.log('🔧 Applying Sharp enhancements...');
-      const brightness = Math.max(0.5, Math.min(2.0, analysis.brightness || 1.2));
-      const saturation = Math.max(0.5, Math.min(3.0, analysis.saturation || 1.4));
-      const contrast = Math.max(0.5, Math.min(3.0, analysis.contrast || 1.3));
 
-      await Promise.race([
-        sharp(imagePath)
-          .modulate({
-            brightness,
-            saturation
-          })
-          .linear(contrast, -(128 * (contrast - 1)))
-          .sharpen()
-          .jpeg({ quality: 95, progressive: true })
-          .toFile(outputPath),
+      // Now generate enhanced image with DALL-E 3
+      console.log('🎨 Generating enhanced image with DALL-E 3...');
+      
+      const enhancementPrompt = `Crie uma versão melhorada e profissional desta comida: ${analysis.descricao_detalhada}.
+
+Aspectos a melhorar:
+- Aumentar brilho e contraste para realçar cores vibrantes
+- Melhorar iluminação profissional tipo fotografia gastronômica
+- Realçar texturas e frescor dos ingredientes
+- Deixar mais apetitoso e atrativo para delivery/iFood
+- Manter o realismo, mas com qualidade de fotografia profissional
+- Foco em gerar desejo de consumo imediato
+
+Estilo: fotografia gastronômica profissional, iluminação perfeita, cores vibrantes, apresentação impecável, fundo limpo, alta qualidade, 4K.
+
+${analysis.observacoes}`;
+
+      const imageGeneration = this.openai.images.generate({
+        model: "dall-e-3",
+        prompt: enhancementPrompt,
+        size: "1024x1024",
+        quality: "hd",
+        style: "natural",
+        n: 1
+      });
+
+      const imageResponse = await Promise.race([
+        imageGeneration,
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Sharp processing timeout')), 30000)
+          setTimeout(() => reject(new Error('DALL-E generation timeout')), 60000)
         )
       ]);
-      console.log('✅ Sharp processing completed');
+
+      const imageUrl = imageResponse.data[0].url;
+      console.log('✅ DALL-E image generated');
+
+      // Download and save the generated image
+      console.log('💾 Downloading generated image...');
+      const axios = require('axios');
+      const imageDownload = await axios.get(imageUrl, { 
+        responseType: 'arraybuffer',
+        timeout: 30000
+      });
+
+      await fs.writeFile(outputPath, imageDownload.data);
+      console.log('✅ Enhanced image saved');
 
       // Verify output file was created
       try {
@@ -151,17 +160,23 @@ class OpenAIService {
         throw new Error('Enhanced image file was not created successfully');
       }
 
-      console.log('✨ Enhancement completed successfully!');
+      console.log('✨ DALL-E 3 enhancement completed successfully!');
 
       return {
         success: true,
-        analysis,
+        analysis: {
+          produto: analysis.produto,
+          metodo: 'DALL-E 3 Generation',
+          descricao: analysis.descricao_detalhada,
+          observacoes: 'Nova imagem gerada com DALL-E 3 baseada na original',
+          dalle_prompt: enhancementPrompt
+        },
         enhancedPath: outputPath
       };
       
     } catch (error) {
-      console.error('❌ OpenAI enhancement error:', error.message);
-      console.log('🔄 Falling back to basic enhancement...');
+      console.error('❌ DALL-E enhancement error:', error.message);
+      console.log('🔄 Falling back to Sharp enhancement...');
       
       // Fallback to basic enhancement
       return this.fallbackEnhancement(imagePath, outputPath);

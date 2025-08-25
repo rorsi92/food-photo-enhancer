@@ -1,121 +1,190 @@
-# Food Photo Enhancer
+# 🍔 Food Photo Enhancer
 
-AI-powered food photo enhancement tool using OpenAI's GPT-4 Vision API.
+**AI-powered food photo enhancement using DALL-E 3 and GPT-4o Vision**
 
-## Features
+Transform your food photos into professional, mouth-watering images that drive sales and engagement!
 
-- ✨ Single and batch photo processing (up to 50 photos)
-- 🤖 AI-powered enhancement using OpenAI GPT-4 Vision
-- 🍔 Automatic food type detection
-- 📸 Professional-grade enhancements optimized for food photography
-- 👤 User authentication and subscription management
-- 💾 Photo history and management
-- 🎨 Beautiful, responsive UI
+---
 
-## Tech Stack
+## 🚀 **RAILWAY DEPLOYMENT - QUICK START**
 
-### Frontend
-- React with TypeScript
-- Vite for fast development
-- Tailwind CSS for styling
-- Axios for API calls
+### **1. Environment Variables (SET THESE IN RAILWAY!)**
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+NODE_ENV=production
+PORT=5000
+OPENAI_MODEL=gpt-4o
+```
 
-### Backend
-- Node.js with Express
-- TypeScript
-- Prisma ORM with PostgreSQL
-- JWT authentication
-- OpenAI API integration
-- Sharp for image processing
-- Multer for file uploads
+### **2. Deploy Commands**
+- **Build Command:** `npm run build`
+- **Start Command:** `npm start`
+- **Health Check:** `/health`
 
-## Setup Instructions
+### **3. Railway Configuration**
+The project includes:
+- ✅ `railway.json` configured
+- ✅ `start.js` script for proper backend startup
+- ✅ Health check endpoint at `/health`
+- ✅ All dependencies managed
 
-### Prerequisites
-- Node.js 18+ installed
-- PostgreSQL database
-- OpenAI API key (already configured)
+---
 
-### 1. Install Dependencies
+## 🎯 **FEATURES**
 
+### **🤖 AI-Powered Enhancement**
+- **GPT-4o Vision** analyzes your food photos
+- **DALL-E 3** generates professionally enhanced versions
+- **Smart recognition** of different food types
+- **Professional photography** style enhancement
+
+### **⚡ Processing Methods**
+1. **DALL-E 3 Generation** (Primary) - Creates new enhanced images
+2. **Sharp Processing** (Fallback) - Traditional image enhancement
+3. **Automatic fallback** if AI fails
+
+### **📸 Photo Enhancement**
+- **Professional lighting** and composition
+- **Vibrant colors** that make food irresistible
+- **Enhanced textures** and freshness
+- **Optimized for delivery apps** (iFood, Uber Eats, etc.)
+
+---
+
+## 🛠 **TECH STACK**
+
+### **Backend** (What gets deployed)
+- **Node.js + Express** - RESTful API
+- **OpenAI API** - GPT-4o Vision + DALL-E 3
+- **Sharp** - Image processing fallback
+- **Multer** - File upload handling
+- **SQLite + Prisma** - Database and ORM
+
+### **Frontend** (Development only)
+- **React + TypeScript** - Modern UI
+- **Vite** - Fast development
+- **Tailwind CSS** - Beautiful styling
+- **Axios** - API communication
+
+---
+
+## 🏗 **LOCAL DEVELOPMENT**
+
+### **Prerequisites**
+- Node.js 18+
+- OpenAI API key
+
+### **Setup**
 ```bash
-# Install backend dependencies
+# Clone and install
+git clone https://github.com/rorsi92/food-photo-enhancer.git
+cd food-photo-enhancer
+
+# Backend setup
 cd backend
 npm install
+npm start
 
-# Install frontend dependencies
+# Frontend setup (new terminal)
 cd ..
 npm install
-```
-
-### 2. Configure Environment Variables
-
-#### Backend (.env in /backend)
-```env
-# Already configured with your OpenAI key
-DATABASE_URL="postgresql://user:password@localhost:5432/food_photo_enhancer"
-JWT_SECRET=generate_a_secure_random_string_here
-```
-
-#### Frontend (.env in root)
-```env
-VITE_API_URL=http://localhost:5000
-```
-
-### 3. Setup Database
-
-```bash
-cd backend
-npx prisma generate
-npx prisma migrate dev --name init
-```
-
-### 4. Run the Application
-
-```bash
-# Terminal 1: Start backend
-cd backend
-npm run dev
-
-# Terminal 2: Start frontend
-cd ..
 npm run dev
 ```
 
-The application will be available at:
-- Frontend: http://localhost:5173
-- Backend: http://localhost:5000
+### **URLs**
+- **Backend API:** http://localhost:5000
+- **Frontend:** http://localhost:5177
+- **Health Check:** http://localhost:5000/health
 
-## Usage
+---
 
-1. Open the application in your browser
-2. Register or login (for demo, registration is simplified)
-3. Upload single or multiple food photos
-4. Photos are automatically sent to OpenAI for analysis
-5. Enhanced photos are processed and displayed
-6. Download individual or all enhanced photos
+## 📡 **API ENDPOINTS**
 
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-- `POST /api/auth/refresh` - Refresh tokens
-- `GET /api/auth/profile` - Get user profile
-
-### Photo Enhancement
+### **Core Endpoints**
+- `GET /` - API info and status
+- `GET /health` - Health check (for Railway)
 - `POST /api/enhance/single` - Enhance single photo
 - `POST /api/enhance/batch` - Enhance multiple photos
-- `GET /api/enhance/photos` - Get user's photos
-- `DELETE /api/enhance/photos/:id` - Delete photo
 
-## Subscription Plans
+### **File Serving**
+- `GET /uploads/:filename` - Original photos
+- `GET /processed/:filename` - Enhanced photos
 
-- **Free**: 10 photos/month, single upload
-- **Basic**: 100 photos/month, batch up to 10
-- **Pro**: 1000 photos/month, batch up to 50
-- **Enterprise**: Unlimited, batch up to 100
+---
 
-## License
+## 🔧 **HOW IT WORKS**
 
-MIT
+### **Enhancement Process**
+1. **📤 Upload** - User uploads food photo
+2. **🤖 Analysis** - GPT-4o describes the food in detail
+3. **🎨 Generation** - DALL-E 3 creates enhanced version
+4. **💾 Download** - Enhanced image saved and served
+5. **🔄 Fallback** - If AI fails, Sharp processing as backup
+
+### **Example Flow**
+```
+Original Photo → GPT-4o Analysis → DALL-E 3 Generation → Enhanced Photo
+     113KB    →    "Hambúrguer..."    →    AI Generation    →    1.3MB
+```
+
+---
+
+## 💡 **DEPLOYMENT TROUBLESHOOTING**
+
+### **Common Issues & Solutions**
+
+#### **Health Check Fails**
+- ✅ Health endpoint is `/health`
+- ✅ Returns `200 OK` with server stats
+- ✅ Timeout set to 300s in railway.json
+
+#### **Build Fails**
+- ✅ `start.js` handles backend startup
+- ✅ Dependencies auto-install on deploy
+- ✅ Node.js 18+ specified in engines
+
+#### **API Errors**
+- ✅ OpenAI key must be set in Railway env vars
+- ✅ DALL-E 3 requires valid OpenAI account
+- ✅ Fallback to Sharp if OpenAI fails
+
+---
+
+## 📊 **PRICING ESTIMATES**
+
+### **OpenAI API Costs**
+- **GPT-4o Vision:** ~$0.01 per image analysis
+- **DALL-E 3:** ~$0.04 per image generation
+- **Total:** ~$0.05 per enhanced photo
+
+### **Railway Hosting**
+- **Starter Plan:** $5/month
+- **Pro Plan:** $20/month (recommended)
+
+---
+
+## 🎨 **SAMPLE ENHANCEMENT**
+
+**Before:** Basic food photo
+**After:** Professional, vibrant, appetizing image optimized for delivery apps
+
+The AI understands food presentation and applies:
+- ✨ Professional lighting
+- 🌈 Enhanced colors
+- 🥗 Fresh textures
+- 📐 Better composition
+- 🎯 Delivery-optimized appeal
+
+---
+
+## 🤝 **SUPPORT**
+
+- **GitHub:** [food-photo-enhancer](https://github.com/rorsi92/food-photo-enhancer)
+- **Issues:** Report bugs via GitHub Issues
+- **Deployment:** Check Railway logs for errors
+
+---
+
+## 📄 **LICENSE**
+
+MIT License - Feel free to use and modify!

@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "cd backend && npm install",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "cd backend && npm install && npm start",
+    "start": "node start.js",
     "server": "cd backend && npm start"
   },
   "engines": {
